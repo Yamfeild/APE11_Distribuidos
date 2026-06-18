@@ -1,14 +1,11 @@
 import React, { useState, useEffect, useCallback, useRef } from 'react'
 import ProcesoCard from './components/ProcesoCard'
-import PanelControl from './components/PanelControl'
+import NetworkTopology from './components/NetworkTopology'
 import LogMensajes from './components/LogMensajes'
+import ConfiguracionPeers from './components/ConfiguracionPeers'
 import {
   fetchAllPeersStatus,
-  fetchLogsFromAll,
-  toggleFail,
-  startElection,
-  reset,
-  PEERS_CONFIG
+  fetchLogsFromAll
 } from './services/api'
 
 export default function App() {
@@ -18,118 +15,151 @@ export default function App() {
   const intervalRef = useRef(null)
 
   const refreshAll = useCallback(async () => {
-    const [statusList, logs] = await Promise.all([
-      fetchAllPeersStatus(),
-      fetchLogsFromAll()
-    ])
-    setProcesos(statusList)
-    setMensajes(logs)
+    try {
+      const [statusList, logs] = await Promise.all([
+        fetchAllPeersStatus(),
+        fetchLogsFromAll()
+      ])
+      setProcesos(statusList)
+      setMensajes(logs)
+    } catch (err) {
+      console.error('Error refreshing cluster status', err)
+    }
   }, [])
 
+  // Poll faster (every 1.5 seconds) to make the manual disconnection detection feel instantaneous
   useEffect(() => {
     refreshAll()
-    intervalRef.current = setInterval(refreshAll, 5000)
+    intervalRef.current = setInterval(refreshAll, 1500)
     return () => clearInterval(intervalRef.current)
   }, [refreshAll])
-
-  const handleSimularFalla = async () => {
-    setLoading(true)
-    const coordinador = procesos.find(p => p.esCoordinador && p.conectado)
-    const target = coordinador || procesos.filter(p => p.activo && p.conectado).sort((a, b) => b.id - a.id)[0]
-    if (target) await toggleFail(target)
-    await refreshAll()
-    setLoading(false)
-  }
-
-  const handleIniciarEleccion = async () => {
-    setLoading(true)
-    const p2 = PEERS_CONFIG.find(p => p.id === 2)
-    if (p2) await startElection(p2)
-    await new Promise(r => setTimeout(r, 6000))
-    await refreshAll()
-    setLoading(false)
-  }
-
-  const handleRefresh = async () => {
-    setLoading(true)
-    await refreshAll()
-    setLoading(false)
-  }
-
-  const handleReset = async () => {
-    setLoading(true)
-    const connected = procesos.find(p => p.conectado)
-    if (connected) await reset(connected)
-    await refreshAll()
-    setLoading(false)
-  }
 
   const activePeer = procesos.find(p => p.conectado && p.activo && p.coordinadorActual !== null && p.coordinadorActual !== -1)
     || procesos.find(p => p.conectado && p.coordinadorActual !== null && p.coordinadorActual !== -1)
   const coordinadorId = activePeer ? activePeer.coordinadorActual : null
   const coordinador = procesos.find(p => p.id === coordinadorId)
-  const inactivos = procesos.filter(p => !p.activo).length
+  
+  const totalPeers = procesos.length
+  const conectadosCount = procesos.filter(p => p.conectado).length
+  const activosCount = procesos.filter(p => p.conectado && p.activo).length
 
   return (
-    <div className="container py-4">
-      <div className="text-center mb-4">
-        <h1 className="display-6">Práctica 10 — Algoritmo Bully</h1>
-        <p className="text-muted">
-          Sistemas Distribuidos &middot; Elección de Coordinador
-        </p>
-      </div>
+    <div className="container py-4 max-w-7xl">
+      <header className="d-flex justify-content-between align-items-center mb-4 flex-wrap gap-3 border-bottom border-dark-semi pb-4">
+        <div>
+          <span className="badge bg-indigo-semi text-indigo-text px-3 py-1.5 rounded-pill border border-indigo-edge mb-2 d-inline-block font-mono">
+            Sistemas Distribuidos
+          </span>
+          <h1 className="display-5 text-light fw-extrabold tracking-tight mb-1">
+            Algoritmo Bully <span className="text-gradient">Interactivo</span>
+          </h1>
+          <p className="text-muted mb-0">
+            Simulador automático y en tiempo real de elección de coordinador ante fallas físicas
+          </p>
+        </div>
+        <div className="d-flex align-items-center gap-3 bg-dark-semi p-2.5 rounded-lg border border-dark-semi">
+          <div className="text-end">
+            <div className="text-muted small">Estado General</div>
+            <div className="text-light fw-bold font-mono">
+              {conectadosCount === 0 ? 'Sin Nodos Conectados' : `${activosCount} / ${totalPeers} Activos`}
+            </div>
+          </div>
+          <span className={`status-dot ${conectadosCount > 0 ? (activosCount === totalPeers ? 'dot-active' : 'dot-fail') : 'dot-offline'} size-large`} />
+        </div>
+      </header>
 
-      <div className="row mb-3">
+      {/* Peer Configuration Manager */}
+      <ConfiguracionPeers />
+
+      {/* Cluster Quick Statistics */}
+      <div className="row mb-4 g-3">
         <div className="col-md-4">
-          <div className="card bg-light">
-            <div className="card-body text-center py-2">
-              <small className="text-muted">Coordinador actual</small>
-              <h4 className="mb-0">
-                {coordinador ? `P${coordinador.id}` : 'Ninguno'}
-              </h4>
+          <div className="card glass-card h-100 border-none">
+            <div className="card-body py-3 d-flex justify-content-between align-items-center">
+              <div>
+                <small className="text-muted d-block uppercase tracking-wider fs-9">Líder Electo</small>
+                <h3 className="mb-0 text-light fw-bold font-mono">
+                  {coordinador ? `Proceso ${coordinador.id}` : 'Buscando...'}
+                </h3>
+              </div>
+              <div className="icon-badge bg-warning-glow text-warning-glow-text rounded p-2">
+                👑
+              </div>
             </div>
           </div>
         </div>
         <div className="col-md-4">
-          <div className="card bg-light">
-            <div className="card-body text-center py-2">
-              <small className="text-muted">Procesos activos</small>
-              <h4 className="mb-0">
-                {procesos.filter(p => p.activo).length} / {procesos.length}
-              </h4>
+          <div className="card glass-card h-100 border-none">
+            <div className="card-body py-3 d-flex justify-content-between align-items-center">
+              <div>
+                <small className="text-muted d-block uppercase tracking-wider fs-9">Procesos en Línea</small>
+                <h3 className="mb-0 text-light fw-bold font-mono">
+                  {conectadosCount} / {totalPeers}
+                </h3>
+              </div>
+              <div className="icon-badge bg-success-glow text-success-glow-text rounded p-2">
+                🔌
+              </div>
             </div>
           </div>
         </div>
         <div className="col-md-4">
-          <div className="card bg-light">
-            <div className="card-body text-center py-2">
-              <small className="text-muted">Mensajes totales</small>
-              <h4 className="mb-0">{mensajes.length}</h4>
+          <div className="card glass-card h-100 border-none">
+            <div className="card-body py-3 d-flex justify-content-between align-items-center">
+              <div>
+                <small className="text-muted d-block uppercase tracking-wider fs-9">Mensajes Intercambiados</small>
+                <h3 className="mb-0 text-light fw-bold font-mono">
+                  {mensajes.length}
+                </h3>
+              </div>
+              <div className="icon-badge bg-info-glow text-info-glow-text rounded p-2">
+                💬
+              </div>
             </div>
           </div>
         </div>
       </div>
 
-      <PanelControl
-        onSimularFalla={handleSimularFalla}
-        onIniciarEleccion={handleIniciarEleccion}
-        onRefresh={handleRefresh}
-        onReset={handleReset}
-        loading={loading}
-      />
-
-      <div className="row row-cols-1 row-cols-md-3 row-cols-lg-5 g-3 mb-4">
-        {procesos.map(p => (
-          <div className="col" key={p.id}>
-            <ProcesoCard proceso={p} />
+      {/* Interactive Topology and Process Grid Split */}
+      <div className="row g-4 mb-4">
+        <div className="col-lg-5 col-md-12">
+          <NetworkTopology procesos={procesos} mensajes={mensajes} />
+        </div>
+        
+        <div className="col-lg-7 col-md-12">
+          <div className="card glass-card h-100 p-4 border-none">
+            <h5 className="text-light fw-bold mb-3 d-flex align-items-center gap-2">
+              <span className="d-inline-block rounded-circle bg-success dot-active" style={{ width: 8, height: 8 }}></span>
+              Monitor de Procesos
+            </h5>
+            <p className="text-muted small mb-4">
+              Apaga o enciende procesos manualmente en tu terminal (ej: matando el proceso de Spring Boot). Los latidos del sistema (heartbeats) detectarán la caída del líder en un máximo de 3 segundos, iniciando la elección inmediatamente.
+            </p>
+            
+            {procesos.length === 0 ? (
+              <div className="text-center text-muted p-5 bg-dark-semi rounded border border-dark-semi font-mono">
+                Ningún proceso configurado responde. Asegúrate de iniciar las instancias del backend en los puertos configurados.
+              </div>
+            ) : (
+              <div className="row row-cols-1 row-cols-md-2 row-cols-xl-3 g-3">
+                {procesos.map(p => (
+                  <div className="col" key={p.id}>
+                    <ProcesoCard proceso={p} />
+                  </div>
+                ))}
+              </div>
+            )}
           </div>
-        ))}
+        </div>
       </div>
 
-      <LogMensajes mensajes={mensajes} />
+      {/* Log Messages System Console */}
+      <div className="mb-5">
+        <LogMensajes mensajes={mensajes} />
+      </div>
 
-      <footer className="mt-4 text-center text-muted small">
-        Práctica 10 - FEIRNNR &middot; Carrera de Computación
+      <footer className="border-top border-dark-semi mt-5 pt-4 text-center text-muted small">
+        Práctica 10 - Sistemas Distribuidos &middot; Carrera de Computación &middot; FEIRNNR
       </footer>
     </div>
   )

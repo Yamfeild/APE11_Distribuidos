@@ -1,8 +1,29 @@
-const PEERS_CONFIG = [
+const DEFAULT_PEERS = [
   { id: 1, ip: '192.168.1.10', puerto: 8085 },
   { id: 2, ip: '192.168.1.11', puerto: 8085 },
   { id: 3, ip: '192.168.1.12', puerto: 8085 }
 ]
+
+export function getPeersConfig() {
+  const saved = localStorage.getItem('bully_peers_config')
+  if (saved) {
+    try {
+      return JSON.parse(saved)
+    } catch {
+      return DEFAULT_PEERS
+    }
+  }
+  return DEFAULT_PEERS
+}
+
+export function savePeersConfig(config) {
+  localStorage.setItem('bully_peers_config', JSON.stringify(config))
+}
+
+export function resetPeersConfig() {
+  localStorage.removeItem('bully_peers_config')
+  return DEFAULT_PEERS
+}
 
 function peerUrl(peer) {
   return `http://${peer.ip}:${peer.puerto}/api/bully`
@@ -47,7 +68,8 @@ export async function reset(peer) {
 
 export async function fetchAllPeersStatus() {
   const results = []
-  for (const peer of PEERS_CONFIG) {
+  const config = getPeersConfig()
+  for (const peer of config) {
     const status = await getStatus(peer)
     results.push({
       id: peer.id,
@@ -66,12 +88,23 @@ export async function fetchAllPeersStatus() {
 
 export async function fetchLogsFromAll() {
   const allLogs = []
-  for (const peer of PEERS_CONFIG) {
+  const config = getPeersConfig()
+  for (const peer of config) {
     const logs = await getLog(peer)
     if (logs) allLogs.push(...logs)
   }
-  allLogs.sort((a, b) => a.timestamp - b.timestamp)
-  return allLogs
+  
+  // Remove duplicates by comparing timestamp, type, origin, and destino
+  const uniqueLogs = []
+  const seen = new Set()
+  for (const log of allLogs) {
+    const key = `${log.timestamp}-${log.tipo}-${log.origen}-${log.destino}`
+    if (!seen.has(key)) {
+      seen.add(key)
+      uniqueLogs.push(log)
+    }
+  }
+  
+  uniqueLogs.sort((a, b) => a.timestamp - b.timestamp)
+  return uniqueLogs
 }
-
-export { PEERS_CONFIG }

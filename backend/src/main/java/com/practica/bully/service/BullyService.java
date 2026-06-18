@@ -54,7 +54,7 @@ public class BullyService {
         log("INICIO_ELECCION", processId, -1);
 
         List<Proceso> superiores = peers.stream()
-                .filter(p -> p.getId() > processId && p.isActivo())
+                .filter(p -> p.getId() > processId)
                 .sorted(Comparator.comparingInt(Proceso::getId))
                 .collect(Collectors.toList());
 
@@ -143,7 +143,7 @@ public class BullyService {
         log("COORDINATOR", processId, -1);
 
         for (Proceso p : peers) {
-            if (p.getId() < processId && p.isActivo()) {
+            if (p.getId() < processId) {
                 MensajeBully msg = new MensajeBully("COORDINATOR", processId, p.getId());
                 enviarMensaje(p, msg);
             }
@@ -151,7 +151,7 @@ public class BullyService {
     }
 
     private boolean enviarMensaje(Proceso destino, MensajeBully msg) {
-        if (destino == null || !destino.isActivo()) return false;
+        if (destino == null) return false;
 
         if (destino.getId() == processId) {
             recibirMensaje(msg);
@@ -166,6 +166,7 @@ public class BullyService {
                 destino.setEsCoordinador(false);
                 return false;
             }
+            destino.setActivo(true);
             return true;
         } catch (ResourceAccessException e) {
             destino.setActivo(false);
@@ -224,5 +225,70 @@ public class BullyService {
             if (bitacora.size() >= MAX_LOG) bitacora.pollFirst();
             bitacora.addLast(new MensajeBully(tipo, origen, destino));
         }
+    }
+
+    // --- HEARTBEAT & STARTUP ELECTION FUNCTIONALITIES ---
+
+    @org.springframework.scheduling.annotation.Scheduled(fixedDelay = 3000, initialDelay = 5000)
+    public void checkCoordinatorHeartbeat() {
+        Proceso este = getProceso(processId);
+        if (este == null || !este.isActivo()) {
+            return;
+        }
+
+        int coordId = coordinadorActual;
+        if (coordId == processId) {
+            return;
+        }
+
+        if (coordId == -1) {
+            new Thread(this::iniciarEleccion).start();
+            return;
+        }
+
+        Proceso coord = getProceso(coordId);
+        if (coord == null) {
+            coordinadorActual = -1;
+            new Thread(this::iniciarEleccion).start();
+            return;
+        }
+
+        try {
+            String url = "http://" + coord.getIp() + ":" + coord.getPuerto() + "/api/bully/status";
+            org.springframework.http.ResponseEntity<Map> response = restTemplate.getForEntity(url, Map.class);
+            if (response.getStatusCode().is2xxSuccessful() && response.getBody() != null) {
+                Boolean active = (Boolean) response.getBody().get("activo");
+                if (active != null && !active) {
+                    handleCoordinatorFailure(coord);
+                } else {
+                    coord.setActivo(true);
+                }
+            } else {
+                handleCoordinatorFailure(coord);
+            }
+        } catch (Exception e) {
+            handleCoordinatorFailure(coord);
+        }
+    }
+
+    private void handleCoordinatorFailure(Proceso coord) {
+        log("FALLO", coord.getId(), -1);
+        coord.setActivo(false);
+        coord.setEsCoordinador(false);
+        coordinadorActual = -1;
+        new Thread(this::iniciarEleccion).start();
+    }
+
+    @org.springframework.context.event.EventListener(org.springframework.boot.context.event.ApplicationReadyEvent.class)
+    public void onStartup() {
+        new Thread(() -> {
+            try {
+                Thread.sleep(2000);
+                Proceso este = getProceso(processId);
+                if (este != null && este.isActivo()) {
+                    iniciarEleccion();
+                }
+            } catch (InterruptedException ignored) {}
+        }).start();
     }
 }

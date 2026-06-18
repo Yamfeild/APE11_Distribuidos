@@ -1,23 +1,319 @@
+@import url('https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&family=Fira+Code:wght@400;500;600&display=swap');
+
+:root {
+  --bg-primary: #070913;
+  --bg-gradient: radial-gradient(circle at top, #0f172a 0%, #020617 100%);
+  --glass-bg: rgba(15, 23, 42, 0.45);
+  --glass-border: rgba(255, 255, 255, 0.08);
+  --glass-border-heavy: rgba(255, 255, 255, 0.15);
+  --color-indigo: #6366f1;
+  --color-indigo-hover: #4f46e5;
+  --color-indigo-semi: rgba(99, 102, 241, 0.15);
+  --color-indigo-edge: rgba(99, 102, 241, 0.3);
+  --color-indigo-text: #818cf8;
+  
+  /* Glowing badges */
+  --glow-info-bg: rgba(0, 210, 255, 0.08);
+  --glow-info-border: rgba(0, 210, 255, 0.3);
+  --glow-info-text: #00d2ff;
+  
+  --glow-success-bg: rgba(0, 255, 135, 0.08);
+  --glow-success-border: rgba(0, 255, 135, 0.3);
+  --glow-success-text: #00ff87;
+  
+  --glow-warning-bg: rgba(255, 193, 7, 0.08);
+  --glow-warning-border: rgba(255, 193, 7, 0.3);
+  --glow-warning-text: #ffd23f;
+  
+  --glow-danger-bg: rgba(230, 57, 70, 0.08);
+  --glow-danger-border: rgba(230, 57, 70, 0.3);
+  --glow-danger-text: #ff4d6d;
+
+  --glow-purple-bg: rgba(168, 85, 247, 0.08);
+  --glow-purple-border: rgba(168, 85, 247, 0.3);
+  --glow-purple-text: #c084fc;
+}
+
 body {
-  background-color: #f5f5f5;
-  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  background: var(--bg-primary);
+  background-image: var(--bg-gradient);
+  background-attachment: fixed;
+  color: #f8fafc;
+  font-family: 'Outfit', sans-serif;
+  min-height: 100vh;
 }
 
-.card-coordinador {
-  border: 2px solid #ffc107 !important;
-  box-shadow: 0 0 10px rgba(255, 193, 7, 0.4);
+/* Glassmorphism Cards */
+.glass-card {
+  background: var(--glass-bg);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border: 1px solid var(--glass-border) !important;
+  border-radius: 16px !important;
+  box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.37);
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
-.card-inactivo {
-  opacity: 0.6;
+.glass-card:hover {
+  border-color: rgba(255, 255, 255, 0.12) !important;
 }
 
-.log-table td, .log-table th {
-  font-family: 'Courier New', monospace;
-  font-size: 0.85rem;
+/* Elevating hover effect */
+.hover-elevate:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 12px 40px 0 rgba(0, 0, 0, 0.5);
 }
 
-.badge-election { background-color: #0d6efd; }
-.badge-ok { background-color: #198754; }
-.badge-coordinator { background-color: #ffc107; color: #000; }
-.badge-fallo { background-color: #dc3545; }
+/* Border highlighting for coordinator/leader */
+.border-leader {
+  border: 1.5px solid rgba(255, 193, 7, 0.4) !important;
+}
+
+.shadow-leader {
+  box-shadow: 0 0 25px rgba(255, 193, 7, 0.15), 0 8px 32px 0 rgba(0, 0, 0, 0.37) !important;
+}
+
+/* Form controls inside config */
+.bg-dark-semi {
+  background: rgba(15, 23, 42, 0.6) !important;
+}
+
+.border-dark-semi {
+  border-color: rgba(255, 255, 255, 0.06) !important;
+}
+
+.bg-dark-semi input,
+.bg-dark-semi select {
+  background-color: #030712 !important;
+  border: 1px solid rgba(255, 255, 255, 0.1) !important;
+}
+
+.bg-dark-semi input:focus {
+  border-color: var(--color-indigo) !important;
+  box-shadow: 0 0 0 0.25rem rgba(99, 102, 241, 0.25) !important;
+  color: #fff !important;
+}
+
+/* Badges and Buttons */
+.btn-indigo {
+  background-color: var(--color-indigo);
+  border-color: var(--color-indigo);
+  color: #fff;
+  transition: all 0.2s ease;
+}
+
+.btn-indigo:hover {
+  background-color: var(--color-indigo-hover);
+  border-color: var(--color-indigo-hover);
+  color: #fff;
+}
+
+.bg-indigo-semi {
+  background-color: var(--color-indigo-semi) !important;
+}
+
+.text-indigo-text {
+  color: var(--color-indigo-text) !important;
+}
+
+.border-indigo-edge {
+  border-color: var(--color-indigo-edge) !important;
+}
+
+.bg-leader-gold {
+  background-color: #ffd23f !important;
+}
+
+/* Glowing text and gradient text */
+.text-gradient {
+  background: linear-gradient(135deg, #818cf8 0%, #c084fc 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+/* Log badging system */
+.bg-info-glow {
+  background-color: var(--glow-info-bg) !important;
+  border-color: var(--glow-info-border) !important;
+}
+.text-info-glow-text {
+  color: var(--glow-info-text) !important;
+}
+
+.bg-success-glow {
+  background-color: var(--glow-success-bg) !important;
+  border-color: var(--glow-success-border) !important;
+}
+.text-success-glow-text {
+  color: var(--glow-success-text) !important;
+}
+
+.bg-warning-glow {
+  background-color: var(--glow-warning-bg) !important;
+  border-color: var(--glow-warning-border) !important;
+}
+.text-warning-glow-text {
+  color: var(--glow-warning-text) !important;
+}
+
+.bg-danger-glow {
+  background-color: var(--glow-danger-bg) !important;
+  border-color: var(--glow-danger-border) !important;
+}
+.text-danger-glow-text {
+  color: var(--glow-danger-text) !important;
+}
+
+.bg-purple-glow {
+  background-color: var(--glow-purple-bg) !important;
+  border-color: var(--glow-purple-border) !important;
+}
+.text-purple-glow-text {
+  color: var(--glow-purple-text) !important;
+}
+
+/* Status dots */
+.status-dot {
+  display: inline-block;
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+}
+
+.size-large {
+  width: 14px;
+  height: 14px;
+}
+
+.dot-active {
+  background-color: #00ff87;
+  box-shadow: 0 0 10px #00ff87;
+}
+
+.dot-fail {
+  background-color: #e63946;
+  box-shadow: 0 0 10px #e63946;
+}
+
+.dot-offline {
+  background-color: #6c757d;
+}
+
+/* Monospace font utility */
+.font-mono {
+  font-family: 'Fira Code', 'Courier New', monospace !important;
+}
+
+.fs-7 {
+  font-size: 0.85rem !important;
+}
+
+.fs-8 {
+  font-size: 0.75rem !important;
+}
+
+.fs-9 {
+  font-size: 0.65rem !important;
+}
+
+.tracking-wider {
+  letter-spacing: 0.05em;
+}
+
+.uppercase {
+  text-transform: uppercase;
+}
+
+.opacity-70 {
+  opacity: 0.7;
+}
+
+.transition-all {
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.duration-300 {
+  transition-duration: 300ms;
+}
+
+.w-10 { width: 10%; }
+.w-15 { width: 15%; }
+.w-20 { width: 20%; }
+.w-30 { width: 30%; }
+
+/* Log Console Custom Table Styling */
+.table-dark-header {
+  background-color: rgba(15, 23, 42, 0.8) !important;
+}
+
+.log-table tbody tr {
+  transition: background-color 0.15s ease;
+}
+
+.log-table tbody tr:hover {
+  background-color: rgba(99, 102, 241, 0.06) !important;
+}
+
+.table {
+  --bs-table-bg: transparent !important;
+  --bs-table-hover-bg: transparent !important;
+}
+
+/* Custom Scrollbars */
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: rgba(15, 23, 42, 0.2);
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb {
+  background: rgba(255, 255, 255, 0.12);
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: rgba(255, 255, 255, 0.24);
+}
+
+/* Pulsing and spinning animations */
+@keyframes ring-pulse {
+  0% {
+    transform: scale(0.95);
+    opacity: 0.5;
+  }
+  50% {
+    opacity: 0.2;
+  }
+  100% {
+    transform: scale(1.15);
+    opacity: 0;
+  }
+}
+
+.pulse-ring {
+  transform-origin: center;
+  animation: ring-pulse 2s infinite ease-out;
+}
+
+@keyframes text-pulse {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.6; }
+}
+
+.animate-pulse {
+  animation: text-pulse 2s infinite ease-in-out;
+}
+
+.dot-pulse-indigo {
+  display: inline-block;
+  width: 8px;
+  height: 8px;
+  background-color: #818cf8;
+  border-radius: 50%;
+  box-shadow: 0 0 8px #818cf8;
+  animation: text-pulse 1.5s infinite ease-in-out;
+}
