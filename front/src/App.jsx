@@ -64,7 +64,10 @@ export default function App() {
     setLoading(false)
   }
 
-  const coordinador = procesos.find(p => p.esCoordinador)
+  const activePeer = procesos.find(p => p.conectado && p.activo && p.coordinadorActual !== null && p.coordinadorActual !== -1)
+    || procesos.find(p => p.conectado && p.coordinadorActual !== null && p.coordinadorActual !== -1)
+  const coordinadorId = activePeer ? activePeer.coordinadorActual : null
+  const coordinador = procesos.find(p => p.id === coordinadorId)
   const inactivos = procesos.filter(p => !p.activo).length
 
   return (

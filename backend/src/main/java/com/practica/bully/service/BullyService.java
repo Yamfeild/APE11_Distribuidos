@@ -160,11 +160,20 @@ public class BullyService {
 
         try {
             String url = "http://" + destino.getIp() + ":" + destino.getPuerto() + "/api/bully/message";
-            restTemplate.postForObject(url, msg, String.class);
+            String response = restTemplate.postForObject(url, msg, String.class);
+            if ("INACTIVO".equals(response)) {
+                destino.setActivo(false);
+                destino.setEsCoordinador(false);
+                return false;
+            }
             return true;
         } catch (ResourceAccessException e) {
+            destino.setActivo(false);
+            destino.setEsCoordinador(false);
             return false;
         } catch (Exception e) {
+            destino.setActivo(false);
+            destino.setEsCoordinador(false);
             return false;
         }
     }

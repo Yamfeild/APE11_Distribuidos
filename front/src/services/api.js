@@ -57,7 +57,8 @@ export async function fetchAllPeersStatus() {
       esCoordinador: status ? status.esCoordinador : false,
       conectado: status !== null,
       enEleccion: status ? status.enEleccion : false,
-      processId: status ? status.processId : null
+      processId: status ? status.processId : null,
+      coordinadorActual: status ? status.coordinadorActual : null
     })
   }
   return results
