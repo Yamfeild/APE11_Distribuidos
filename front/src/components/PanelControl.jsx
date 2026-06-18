@@ -1,8 +1,8 @@
 import React from 'react'
 
 export default function PanelControl({
-  onFailP5,
-  onDetectFailure,
+  onSimularFalla,
+  onIniciarEleccion,
   onRefresh,
   onReset,
   loading
@@ -14,31 +14,31 @@ export default function PanelControl({
         <div className="d-flex flex-wrap gap-2">
           <button
             className="btn btn-danger"
-            onClick={onFailP5}
+            onClick={onSimularFalla}
             disabled={loading}
           >
-            Simular falla P5
+            Simular falla (coordinador)
           </button>
           <button
             className="btn btn-warning text-dark"
-            onClick={onDetectFailure}
+            onClick={onIniciarEleccion}
             disabled={loading}
           >
-            Detectar falla (P2)
+            Iniciar elección (P2)
           </button>
           <button
             className="btn btn-primary"
             onClick={onRefresh}
             disabled={loading}
           >
-            Refrescar estado
+            Refrescar
           </button>
           <button
             className="btn btn-secondary"
             onClick={onReset}
             disabled={loading}
           >
-            Reiniciar
+            Reiniciar cluster
           </button>
         </div>
       </div>

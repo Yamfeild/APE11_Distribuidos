@@ -32,15 +32,16 @@ export default function App() {
     return () => clearInterval(intervalRef.current)
   }, [refreshAll])
 
-  const handleFailP5 = async () => {
+  const handleSimularFalla = async () => {
     setLoading(true)
-    const p5 = PEERS_CONFIG.find(p => p.id === 5)
-    if (p5) await toggleFail(p5)
+    const coordinador = procesos.find(p => p.esCoordinador && p.conectado)
+    const target = coordinador || procesos.filter(p => p.activo && p.conectado).sort((a, b) => b.id - a.id)[0]
+    if (target) await toggleFail(target)
     await refreshAll()
     setLoading(false)
   }
 
-  const handleDetectFailure = async () => {
+  const handleIniciarEleccion = async () => {
     setLoading(true)
     const p2 = PEERS_CONFIG.find(p => p.id === 2)
     if (p2) await startElection(p2)
@@ -57,7 +58,8 @@ export default function App() {
 
   const handleReset = async () => {
     setLoading(true)
-    await Promise.all(PEERS_CONFIG.map(p => reset(p)))
+    const connected = procesos.find(p => p.conectado)
+    if (connected) await reset(connected)
     await refreshAll()
     setLoading(false)
   }
@@ -106,8 +108,8 @@ export default function App() {
       </div>
 
       <PanelControl
-        onFailP5={handleFailP5}
-        onDetectFailure={handleDetectFailure}
+        onSimularFalla={handleSimularFalla}
+        onIniciarEleccion={handleIniciarEleccion}
         onRefresh={handleRefresh}
         onReset={handleReset}
         loading={loading}

@@ -186,10 +186,11 @@ public class BullyService {
         enEleccion = false;
         okRecibidos.clear();
         bitacora.clear();
-        coordinadorActual = 5;
+        int maxId = peers.stream().mapToInt(Proceso::getId).max().orElse(1);
+        coordinadorActual = maxId;
         for (Proceso p : peers) {
             p.setActivo(true);
-            p.setEsCoordinador(p.getId() == 5);
+            p.setEsCoordinador(p.getId() == maxId);
         }
         getProceso(processId).setActivo(true);
     }

@@ -1,9 +1,7 @@
 const PEERS_CONFIG = [
   { id: 1, ip: '192.168.1.10', puerto: 8085 },
   { id: 2, ip: '192.168.1.11', puerto: 8085 },
-  { id: 3, ip: '192.168.1.12', puerto: 8085 },
-  { id: 4, ip: '192.168.1.13', puerto: 8085 },
-  { id: 5, ip: '192.168.1.14', puerto: 8085 }
+  { id: 3, ip: '192.168.1.12', puerto: 8085 }
 ]
 
 function peerUrl(peer) {

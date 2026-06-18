@@ -15,7 +15,7 @@ public class AppConfig {
 
     private int processId;
     private int timeoutMs = 5000;
-    private int coordinadorInicial = 5;
+    private int coordinadorInicial = 3;
     private final List<PeerConfig> peers = new ArrayList<>();
 
     public int getProcessId() { return processId; }
