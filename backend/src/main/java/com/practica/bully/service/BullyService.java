@@ -19,11 +19,15 @@ public class BullyService {
     private final RestTemplate restTemplate;
     private final int timeoutMs;
 
-    private int coordinadorActual;
-    private boolean enEleccion;
+    private volatile int coordinadorActual;
+    private volatile boolean enEleccion;
     private final Set<Integer> okRecibidos = ConcurrentHashMap.newKeySet();
     private final LinkedList<MensajeBully> bitacora = new LinkedList<>();
     private static final int MAX_LOG = 100;
+    
+    // Fine-grained lock for shared state variables (coordinadorActual, enEleccion, okRecibidos)
+    // to prevent distributed deadlocks when performing network calls
+    private final Object stateLock = new Object();
 
     public BullyService(AppConfig config, List<Proceso> procesos, RestTemplate restTemplate) {
         this.processId = config.getProcessId();
@@ -40,25 +44,24 @@ public class BullyService {
         }
     }
 
-    public synchronized String iniciarEleccion() {
-        if (enEleccion) return "YA_EN_ELECCION";
-        enEleccion = true;
-        coordinadorActual = -1; // Coordinator is unknown during election
-        okRecibidos.clear();
-
-        Proceso este = getProceso(processId);
-        if (este == null || !este.isActivo()) {
-            enEleccion = false;
-            return "PROCESO_INACTIVO";
+    public String iniciarEleccion() {
+        synchronized (stateLock) {
+            if (enEleccion) return "YA_EN_ELECCION";
+            enEleccion = true;
+            coordinadorActual = -1; // Coordinator is unknown during election
+            okRecibidos.clear();
         }
 
         try {
             log("INICIO_ELECCION", processId, -1);
 
-            List<Proceso> superiores = peers.stream()
-                    .filter(p -> p.getId() > processId)
-                    .sorted(Comparator.comparingInt(Proceso::getId))
-                    .collect(Collectors.toList());
+            List<Proceso> superiores;
+            synchronized (this) {
+                superiores = peers.stream()
+                        .filter(p -> p.getId() > processId)
+                        .sorted(Comparator.comparingInt(Proceso::getId))
+                        .collect(Collectors.toList());
+            }
 
             if (superiores.isEmpty()) {
                 declararseCoordinador();
@@ -67,6 +70,7 @@ public class BullyService {
 
             for (Proceso superior : superiores) {
                 MensajeBully msg = new MensajeBully("ELECTION", processId, superior.getId());
+                // enviarMensaje is called OUTSIDE of the stateLock to prevent HTTP call deadlock
                 if (enviarMensaje(superior, msg)) {
                     log("ELECTION", processId, superior.getId());
                 }
@@ -77,16 +81,22 @@ public class BullyService {
             } catch (InterruptedException ignored) {}
 
             boolean alguienRespondio = false;
-            for (Proceso superior : superiores) {
-                if (okRecibidos.contains(superior.getId())) {
-                    alguienRespondio = true;
-                    break;
+            synchronized (stateLock) {
+                for (Proceso superior : superiores) {
+                    if (okRecibidos.contains(superior.getId())) {
+                        alguienRespondio = true;
+                        break;
+                    }
                 }
             }
 
             if (!alguienRespondio) {
-                // Double check if a higher coordinator has declared itself in the meantime
-                if (coordinadorActual == -1 || coordinadorActual <= processId) {
+                // Double check if a higher coordinator has declared itself during our sleep
+                int currentCoord;
+                synchronized (stateLock) {
+                    currentCoord = coordinadorActual;
+                }
+                if (currentCoord == -1 || currentCoord <= processId) {
                     declararseCoordinador();
                     return "NUEVO_COORDINADOR:" + processId;
                 }
@@ -94,26 +104,32 @@ public class BullyService {
 
             return "ELECCION_EN_CURSO";
         } finally {
-            enEleccion = false;
+            synchronized (stateLock) {
+                enEleccion = false;
+            }
         }
     }
 
-    public synchronized String recibirMensaje(MensajeBully msg) {
+    public String recibirMensaje(MensajeBully msg) {
         log(msg.getTipo(), msg.getOrigen(), msg.getDestino());
 
         switch (msg.getTipo()) {
             case "ELECTION":
                 return handleElection(msg);
             case "OK":
-                okRecibidos.add(msg.getOrigen());
+                synchronized (stateLock) {
+                    okRecibidos.add(msg.getOrigen());
+                }
                 return "OK_RECIBIDO";
             case "COORDINATOR":
-                coordinadorActual = msg.getOrigen();
-                for (Proceso p : peers) {
-                    p.setEsCoordinador(p.getId() == msg.getOrigen());
+                synchronized (stateLock) {
+                    coordinadorActual = msg.getOrigen();
+                    for (Proceso p : peers) {
+                        p.setEsCoordinador(p.getId() == msg.getOrigen());
+                    }
+                    okRecibidos.clear();
+                    enEleccion = false;
                 }
-                okRecibidos.clear();
-                enEleccion = false;
                 return "COORDINATOR_ACK";
             default:
                 return "TIPO_DESCONOCIDO";
@@ -125,12 +141,24 @@ public class BullyService {
         if (este == null || !este.isActivo()) return "INACTIVO";
 
         MensajeBully ok = new MensajeBully("OK", processId, msg.getOrigen());
+        // enviarMensaje is called OUTSIDE the lock
         enviarMensaje(getProceso(msg.getOrigen()), ok);
 
-        if (!enEleccion) {
+        boolean startElectionThread = false;
+        synchronized (stateLock) {
+            if (!enEleccion) {
+                startElectionThread = true;
+                enEleccion = true; // reserve election state
+            }
+        }
+
+        if (startElectionThread) {
             new Thread(() -> {
                 try {
                     Thread.sleep(100);
+                    synchronized (stateLock) {
+                        enEleccion = false;
+                    }
                     iniciarEleccion();
                 } catch (InterruptedException ignored) {}
             }).start();
@@ -140,18 +168,25 @@ public class BullyService {
     }
 
     private void declararseCoordinador() {
-        coordinadorActual = processId;
-        for (Proceso p : peers) {
-            p.setEsCoordinador(p.getId() == processId);
+        synchronized (stateLock) {
+            coordinadorActual = processId;
+            for (Proceso p : peers) {
+                p.setEsCoordinador(p.getId() == processId);
+            }
         }
 
         log("COORDINATOR", processId, -1);
 
-        for (Proceso p : peers) {
-            if (p.getId() < processId) {
-                MensajeBully msg = new MensajeBully("COORDINATOR", processId, p.getId());
-                enviarMensaje(p, msg);
-            }
+        List<Proceso> targets;
+        synchronized (this) {
+            targets = peers.stream()
+                    .filter(p -> p.getId() < processId)
+                    .collect(Collectors.toList());
+        }
+
+        for (Proceso p : targets) {
+            MensajeBully msg = new MensajeBully("COORDINATOR", processId, p.getId());
+            enviarMensaje(p, msg);
         }
     }
 
@@ -167,57 +202,85 @@ public class BullyService {
             String url = "http://" + destino.getIp() + ":" + destino.getPuerto() + "/api/bully/message";
             String response = restTemplate.postForObject(url, msg, String.class);
             if ("INACTIVO".equals(response)) {
-                destino.setActivo(false);
-                destino.setEsCoordinador(false);
+                synchronized (this) {
+                    destino.setActivo(false);
+                    destino.setEsCoordinador(false);
+                }
                 return false;
             }
-            destino.setActivo(true);
+            synchronized (this) {
+                destino.setActivo(true);
+            }
             return true;
         } catch (ResourceAccessException e) {
-            destino.setActivo(false);
-            destino.setEsCoordinador(false);
+            synchronized (this) {
+                destino.setActivo(false);
+                destino.setEsCoordinador(false);
+            }
             return false;
         } catch (Exception e) {
-            destino.setActivo(false);
-            destino.setEsCoordinador(false);
+            synchronized (this) {
+                destino.setActivo(false);
+                destino.setEsCoordinador(false);
+            }
             return false;
         }
     }
 
-    public synchronized void toggleFail() {
+    public void toggleFail() {
         Proceso este = getProceso(processId);
         if (este != null) {
-            este.setActivo(!este.isActivo());
-            if (!este.isActivo()) {
-                este.setEsCoordinador(false);
-                if (coordinadorActual == processId) {
-                    coordinadorActual = -1;
+            synchronized (stateLock) {
+                este.setActivo(!este.isActivo());
+                if (!este.isActivo()) {
+                    este.setEsCoordinador(false);
+                    if (coordinadorActual == processId) {
+                        coordinadorActual = -1;
+                    }
                 }
             }
         }
     }
 
-    public synchronized void reset() {
-        enEleccion = false;
-        okRecibidos.clear();
-        bitacora.clear();
-        int maxId = peers.stream().mapToInt(Proceso::getId).max().orElse(1);
-        coordinadorActual = maxId;
-        for (Proceso p : peers) {
-            p.setActivo(true);
-            p.setEsCoordinador(p.getId() == maxId);
+    public void reset() {
+        synchronized (stateLock) {
+            enEleccion = false;
+            okRecibidos.clear();
+            bitacora.clear();
+            int maxId = peers.stream().mapToInt(Proceso::getId).max().orElse(1);
+            coordinadorActual = maxId;
+            for (Proceso p : peers) {
+                p.setActivo(true);
+                p.setEsCoordinador(p.getId() == maxId);
+            }
         }
-        getProceso(processId).setActivo(true);
     }
 
     public Proceso getProceso(int id) {
-        return peers.stream().filter(p -> p.getId() == id).findFirst().orElse(null);
+        synchronized (this) {
+            return peers.stream().filter(p -> p.getId() == id).findFirst().orElse(null);
+        }
     }
 
     public int getProcessId() { return processId; }
-    public int getCoordinadorActual() { return coordinadorActual; }
-    public boolean isEnEleccion() { return enEleccion; }
-    public List<Proceso> getPeers() { return peers; }
+    
+    public int getCoordinadorActual() {
+        synchronized (stateLock) {
+            return coordinadorActual;
+        }
+    }
+    
+    public boolean isEnEleccion() {
+        synchronized (stateLock) {
+            return enEleccion;
+        }
+    }
+    
+    public List<Proceso> getPeers() {
+        synchronized (this) {
+            return new ArrayList<>(peers);
+        }
+    }
 
     public List<MensajeBully> getBitacora() {
         synchronized (bitacora) {
@@ -236,7 +299,7 @@ public class BullyService {
 
     @org.springframework.scheduling.annotation.Scheduled(fixedDelay = 3000, initialDelay = 5000)
     public void checkCoordinatorHeartbeat() {
-        if (enEleccion) {
+        if (isEnEleccion()) {
             return;
         }
         Proceso este = getProceso(processId);
@@ -244,7 +307,7 @@ public class BullyService {
             return;
         }
 
-        int coordId = coordinadorActual;
+        int coordId = getCoordinadorActual();
         if (coordId == processId) {
             return;
         }
@@ -256,7 +319,9 @@ public class BullyService {
 
         Proceso coord = getProceso(coordId);
         if (coord == null) {
-            coordinadorActual = -1;
+            synchronized (stateLock) {
+                coordinadorActual = -1;
+            }
             new Thread(this::iniciarEleccion).start();
             return;
         }
@@ -269,7 +334,9 @@ public class BullyService {
                 if (active != null && !active) {
                     handleCoordinatorFailure(coord);
                 } else {
-                    coord.setActivo(true);
+                    synchronized (this) {
+                        coord.setActivo(true);
+                    }
                 }
             } else {
                 handleCoordinatorFailure(coord);
@@ -281,9 +348,11 @@ public class BullyService {
 
     private void handleCoordinatorFailure(Proceso coord) {
         log("FALLO", coord.getId(), -1);
-        coord.setActivo(false);
-        coord.setEsCoordinador(false);
-        coordinadorActual = -1;
+        synchronized (stateLock) {
+            coord.setActivo(false);
+            coord.setEsCoordinador(false);
+            coordinadorActual = -1;
+        }
         new Thread(this::iniciarEleccion).start();
     }
 
