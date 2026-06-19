@@ -30,14 +30,21 @@ function peerUrl(peer) {
 }
 
 async function fetchJson(url, options = {}) {
+  // Use AbortController with a 1000ms timeout to prevent requests to down/unreachable nodes from freezing frontend polling
+  const controller = new AbortController()
+  const timeoutId = setTimeout(() => controller.abort(), 1000)
+
   try {
     const res = await fetch(url, {
       headers: { 'Content-Type': 'application/json' },
+      signal: controller.signal,
       ...options
     })
+    clearTimeout(timeoutId)
     if (!res.ok) return null
     return await res.json()
   } catch {
+    clearTimeout(timeoutId)
     return null
   }
 }
@@ -66,12 +73,12 @@ export async function reset(peer) {
   return fetchJson(`${peerUrl(peer)}/reset`, { method: 'POST' })
 }
 
+// Fetch status of all configured peers in parallel to prevent sequential fetch blocking
 export async function fetchAllPeersStatus() {
-  const results = []
   const config = getPeersConfig()
-  for (const peer of config) {
+  const promises = config.map(async (peer) => {
     const status = await getStatus(peer)
-    results.push({
+    return {
       id: peer.id,
       ip: peer.ip,
       puerto: peer.puerto,
@@ -81,18 +88,21 @@ export async function fetchAllPeersStatus() {
       enEleccion: status ? status.enEleccion : false,
       processId: status ? status.processId : null,
       coordinadorActual: status ? status.coordinadorActual : null
-    })
-  }
-  return results
+    }
+  })
+  return Promise.all(promises)
 }
 
+// Fetch logs of all configured peers in parallel
 export async function fetchLogsFromAll() {
-  const allLogs = []
   const config = getPeersConfig()
-  for (const peer of config) {
+  const promises = config.map(async (peer) => {
     const logs = await getLog(peer)
-    if (logs) allLogs.push(...logs)
-  }
+    return logs || []
+  })
+  
+  const results = await Promise.all(promises)
+  const allLogs = results.flat()
   
   // Remove duplicates by comparing timestamp, type, origin, and destino
   const uniqueLogs = []

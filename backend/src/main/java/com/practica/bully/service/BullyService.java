@@ -43,6 +43,7 @@ public class BullyService {
     public synchronized String iniciarEleccion() {
         if (enEleccion) return "YA_EN_ELECCION";
         enEleccion = true;
+        coordinadorActual = -1; // Coordinator is unknown during election
         okRecibidos.clear();
 
         Proceso este = getProceso(processId);
@@ -84,8 +85,11 @@ public class BullyService {
             }
 
             if (!alguienRespondio) {
-                declararseCoordinador();
-                return "NUEVO_COORDINADOR:" + processId;
+                // Double check if a higher coordinator has declared itself in the meantime
+                if (coordinadorActual == -1 || coordinadorActual <= processId) {
+                    declararseCoordinador();
+                    return "NUEVO_COORDINADOR:" + processId;
+                }
             }
 
             return "ELECCION_EN_CURSO";
