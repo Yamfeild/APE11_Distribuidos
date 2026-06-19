@@ -1,6 +1,5 @@
 import React, { useState, useEffect, useCallback, useRef } from 'react'
 import ProcesoCard from './components/ProcesoCard'
-import NetworkTopology from './components/NetworkTopology'
 import LogMensajes from './components/LogMensajes'
 import ConfiguracionPeers from './components/ConfiguracionPeers'
 import {
@@ -120,14 +119,10 @@ export default function App() {
         </div>
       </div>
 
-      {/* Interactive Topology and Process Grid Split */}
-      <div className="row g-4 mb-4">
-        <div className="col-lg-5 col-md-12">
-          <NetworkTopology procesos={procesos} mensajes={mensajes} />
-        </div>
-        
-        <div className="col-lg-7 col-md-12">
-          <div className="card glass-card h-100 p-4 border-none">
+      {/* Process Grid Section */}
+      <div className="row mb-4">
+        <div className="col-12">
+          <div className="card glass-card p-4 border-none">
             <h5 className="text-dark fw-bold mb-3 d-flex align-items-center gap-2">
               <span className="d-inline-block rounded-circle bg-success dot-active" style={{ width: 8, height: 8 }}></span>
               Monitor de Procesos
@@ -141,7 +136,7 @@ export default function App() {
                 Ningún proceso configurado responde. Asegúrate de iniciar las instancias del backend en los puertos configurados.
               </div>
             ) : (
-              <div className="row row-cols-1 row-cols-md-2 row-cols-xl-3 g-3">
+              <div className="row row-cols-1 row-cols-md-2 row-cols-lg-3 g-3">
                 {procesos.map(p => (
                   <div className="col" key={p.id}>
                     <ProcesoCard proceso={p} />

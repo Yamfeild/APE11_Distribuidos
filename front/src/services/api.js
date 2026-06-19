@@ -1,7 +1,7 @@
 const DEFAULT_PEERS = [
-  { id: 1, ip: '192.168.1.10', puerto: 8085 },
-  { id: 2, ip: '192.168.1.11', puerto: 8085 },
-  { id: 3, ip: '192.168.1.12', puerto: 8085 }
+  { id: 1, ip: '127.0.0.1', puerto: 8081 },
+  { id: 2, ip: '127.0.0.1', puerto: 8082 },
+  { id: 3, ip: '127.0.0.1', puerto: 8083 }
 ]
 
 export function getPeersConfig() {
