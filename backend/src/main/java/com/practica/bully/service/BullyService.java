@@ -51,46 +51,47 @@ public class BullyService {
             return "PROCESO_INACTIVO";
         }
 
-        log("INICIO_ELECCION", processId, -1);
-
-        List<Proceso> superiores = peers.stream()
-                .filter(p -> p.getId() > processId)
-                .sorted(Comparator.comparingInt(Proceso::getId))
-                .collect(Collectors.toList());
-
-        if (superiores.isEmpty()) {
-            declararseCoordinador();
-            enEleccion = false;
-            return "NUEVO_COORDINADOR:" + processId;
-        }
-
-        for (Proceso superior : superiores) {
-            MensajeBully msg = new MensajeBully("ELECTION", processId, superior.getId());
-            if (enviarMensaje(superior, msg)) {
-                log("ELECTION", processId, superior.getId());
-            }
-        }
-
         try {
-            Thread.sleep(timeoutMs);
-        } catch (InterruptedException ignored) {}
+            log("INICIO_ELECCION", processId, -1);
 
-        boolean alguienRespondio = false;
-        for (Proceso superior : superiores) {
-            if (okRecibidos.contains(superior.getId())) {
-                alguienRespondio = true;
-                break;
+            List<Proceso> superiores = peers.stream()
+                    .filter(p -> p.getId() > processId)
+                    .sorted(Comparator.comparingInt(Proceso::getId))
+                    .collect(Collectors.toList());
+
+            if (superiores.isEmpty()) {
+                declararseCoordinador();
+                return "NUEVO_COORDINADOR:" + processId;
             }
+
+            for (Proceso superior : superiores) {
+                MensajeBully msg = new MensajeBully("ELECTION", processId, superior.getId());
+                if (enviarMensaje(superior, msg)) {
+                    log("ELECTION", processId, superior.getId());
+                }
+            }
+
+            try {
+                Thread.sleep(timeoutMs);
+            } catch (InterruptedException ignored) {}
+
+            boolean alguienRespondio = false;
+            for (Proceso superior : superiores) {
+                if (okRecibidos.contains(superior.getId())) {
+                    alguienRespondio = true;
+                    break;
+                }
+            }
+
+            if (!alguienRespondio) {
+                declararseCoordinador();
+                return "NUEVO_COORDINADOR:" + processId;
+            }
+
+            return "ELECCION_EN_CURSO";
+        } finally {
+            enEleccion = false;
         }
-
-        enEleccion = false;
-
-        if (!alguienRespondio) {
-            declararseCoordinador();
-            return "NUEVO_COORDINADOR:" + processId;
-        }
-
-        return "ELECCION_EN_CURSO";
     }
 
     public synchronized String recibirMensaje(MensajeBully msg) {
@@ -231,6 +232,9 @@ public class BullyService {
 
     @org.springframework.scheduling.annotation.Scheduled(fixedDelay = 3000, initialDelay = 5000)
     public void checkCoordinatorHeartbeat() {
+        if (enEleccion) {
+            return;
+        }
         Proceso este = getProceso(processId);
         if (este == null || !este.isActivo()) {
             return;

@@ -22,14 +22,14 @@ export default function ProcesoCard({ proceso }) {
       <div className="card-body text-center p-3 d-flex flex-column justify-content-between">
         <div>
           <div className="d-flex justify-content-between align-items-center mb-2">
-            <span className="badge bg-dark-semi text-muted">ID: {id}</span>
+            <span className="badge bg-light border text-secondary font-mono">ID: {id}</span>
             <span className="d-flex align-items-center gap-1.5 small font-mono">
               <span className={`status-dot ${conectado ? (activo ? 'dot-active' : 'dot-fail') : 'dot-offline'}`} />
               <span className={`${statusColorClass} fw-semibold`}>P{id}</span>
             </span>
           </div>
 
-          <h4 className="card-title text-light mb-1 d-flex align-items-center justify-content-center gap-2">
+          <h4 className="card-title text-dark mb-1 d-flex align-items-center justify-content-center gap-2">
             Proceso {id}
             {esCoordinador && (
               <span className="badge bg-leader-gold text-dark fs-8 p-1 px-2 rounded-pill shadow-sm animate-pulse">
@@ -50,9 +50,9 @@ export default function ProcesoCard({ proceso }) {
           </div>
           
           {enEleccion && (
-            <div className="mt-2 d-flex align-items-center justify-content-center gap-2 text-info">
+            <div className="mt-2 d-flex align-items-center justify-content-center gap-2 text-primary">
               <span className="spinner-border spinner-border-sm" role="status" aria-hidden="true" />
-              <span className="small font-mono fw-bold">Elegiendo...</span>
+              <span className="small font-mono fw-bold text-primary">Elegiendo...</span>
             </div>
           )}
         </div>

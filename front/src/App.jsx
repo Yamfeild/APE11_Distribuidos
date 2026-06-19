@@ -50,17 +50,17 @@ export default function App() {
           <span className="badge bg-indigo-semi text-indigo-text px-3 py-1.5 rounded-pill border border-indigo-edge mb-2 d-inline-block font-mono">
             Sistemas Distribuidos
           </span>
-          <h1 className="display-5 text-light fw-extrabold tracking-tight mb-1">
+          <h1 className="display-5 text-dark fw-extrabold tracking-tight mb-1">
             Algoritmo Bully <span className="text-gradient">Interactivo</span>
           </h1>
           <p className="text-muted mb-0">
             Simulador automático y en tiempo real de elección de coordinador ante fallas físicas
           </p>
         </div>
-        <div className="d-flex align-items-center gap-3 bg-dark-semi p-2.5 rounded-lg border border-dark-semi">
+        <div className="d-flex align-items-center gap-3 bg-light p-2.5 rounded-lg border border-secondary-subtle">
           <div className="text-end">
             <div className="text-muted small">Estado General</div>
-            <div className="text-light fw-bold font-mono">
+            <div className="text-dark fw-bold font-mono">
               {conectadosCount === 0 ? 'Sin Nodos Conectados' : `${activosCount} / ${totalPeers} Activos`}
             </div>
           </div>
@@ -78,7 +78,7 @@ export default function App() {
             <div className="card-body py-3 d-flex justify-content-between align-items-center">
               <div>
                 <small className="text-muted d-block uppercase tracking-wider fs-9">Líder Electo</small>
-                <h3 className="mb-0 text-light fw-bold font-mono">
+                <h3 className="mb-0 text-dark fw-bold font-mono">
                   {coordinador ? `Proceso ${coordinador.id}` : 'Buscando...'}
                 </h3>
               </div>
@@ -93,7 +93,7 @@ export default function App() {
             <div className="card-body py-3 d-flex justify-content-between align-items-center">
               <div>
                 <small className="text-muted d-block uppercase tracking-wider fs-9">Procesos en Línea</small>
-                <h3 className="mb-0 text-light fw-bold font-mono">
+                <h3 className="mb-0 text-dark fw-bold font-mono">
                   {conectadosCount} / {totalPeers}
                 </h3>
               </div>
@@ -108,7 +108,7 @@ export default function App() {
             <div className="card-body py-3 d-flex justify-content-between align-items-center">
               <div>
                 <small className="text-muted d-block uppercase tracking-wider fs-9">Mensajes Intercambiados</small>
-                <h3 className="mb-0 text-light fw-bold font-mono">
+                <h3 className="mb-0 text-dark fw-bold font-mono">
                   {mensajes.length}
                 </h3>
               </div>
@@ -128,7 +128,7 @@ export default function App() {
         
         <div className="col-lg-7 col-md-12">
           <div className="card glass-card h-100 p-4 border-none">
-            <h5 className="text-light fw-bold mb-3 d-flex align-items-center gap-2">
+            <h5 className="text-dark fw-bold mb-3 d-flex align-items-center gap-2">
               <span className="d-inline-block rounded-circle bg-success dot-active" style={{ width: 8, height: 8 }}></span>
               Monitor de Procesos
             </h5>
@@ -137,7 +137,7 @@ export default function App() {
             </p>
             
             {procesos.length === 0 ? (
-              <div className="text-center text-muted p-5 bg-dark-semi rounded border border-dark-semi font-mono">
+              <div className="text-center text-muted p-5 bg-light rounded border border-secondary-subtle font-mono">
                 Ningún proceso configurado responde. Asegúrate de iniciar las instancias del backend en los puertos configurados.
               </div>
             ) : (

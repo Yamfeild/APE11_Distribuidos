@@ -1,11 +1,11 @@
 import React, { useEffect, useRef } from 'react'
 
 const TIPO_BADGE = {
-  ELECTION: 'bg-info-glow text-info-glow-text',
-  OK: 'bg-success-glow text-success-glow-text',
-  COORDINATOR: 'bg-warning-glow text-warning-glow-text',
-  FALLO: 'bg-danger-glow text-danger-glow-text',
-  INICIO_ELECCION: 'bg-purple-glow text-purple-glow-text'
+  ELECTION: 'bg-info-glow text-info-glow-text border-info-glow-border',
+  OK: 'bg-success-glow text-success-glow-text border-success-glow-border',
+  COORDINATOR: 'bg-warning-glow text-warning-glow-text border-warning-glow-border',
+  FALLO: 'bg-danger-glow text-danger-glow-text border-danger-glow-border',
+  INICIO_ELECCION: 'bg-purple-glow text-purple-glow-text border-purple-glow-border'
 }
 
 export default function LogMensajes({ mensajes }) {
@@ -61,8 +61,8 @@ export default function LogMensajes({ mensajes }) {
 
   return (
     <div className="card glass-card border-none">
-      <div className="card-header border-bottom border-dark-semi d-flex justify-content-between align-items-center bg-dark-semi py-3 px-4">
-        <h5 className="mb-0 text-light fw-bold d-flex align-items-center gap-2">
+      <div className="card-header border-bottom border-dark-semi d-flex justify-content-between align-items-center bg-light-semi py-3 px-4">
+        <h5 className="mb-0 text-dark fw-bold d-flex align-items-center gap-2">
           <span className="dot-pulse-indigo"></span>
           Consola del Sistema (Bitácora)
         </h5>
@@ -75,9 +75,9 @@ export default function LogMensajes({ mensajes }) {
         style={{ maxHeight: '320px', overflowY: 'auto' }}
         ref={containerRef}
       >
-        <table className="table table-dark table-hover mb-0 log-table font-mono border-none">
-          <thead className="table-dark-header sticky-top">
-            <tr className="border-bottom border-dark-semi">
+        <table className="table table-striped table-hover mb-0 log-table font-mono border-none">
+          <thead className="table-lightsticky-top">
+            <tr className="border-bottom border-dark-semi bg-light">
               <th className="py-2.5 px-4 text-muted w-10">#</th>
               <th className="py-2.5 px-2 text-muted w-20">TIPO</th>
               <th className="py-2.5 px-2 text-muted w-15">ORIGEN</th>
@@ -95,10 +95,10 @@ export default function LogMensajes({ mensajes }) {
                     {m.tipo}
                   </span>
                 </td>
-                <td className="py-2.5 px-2 text-light-semi">P{m.origen}</td>
-                <td className="py-2.5 px-2 text-light-semi">{formatDestino(m)}</td>
+                <td className="py-2.5 px-2 text-dark">P{m.origen}</td>
+                <td className="py-2.5 px-2 text-dark">{formatDestino(m)}</td>
                 <td className="py-2.5 px-2 text-muted">{formatTime(m.timestamp)}</td>
-                <td className="py-2.5 px-4 text-muted-light">{formatLogContent(m)}</td>
+                <td className="py-2.5 px-4 text-secondary">{formatLogContent(m)}</td>
               </tr>
             ))}
           </tbody>

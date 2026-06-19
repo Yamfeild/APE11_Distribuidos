@@ -51,11 +51,11 @@ export default function ConfiguracionPeers() {
     <div className="mb-4">
       <div className="d-flex justify-content-between align-items-center mb-3">
         <div>
-          <h2 className="fs-4 text-light fw-bold mb-0">Nodos del Sistema</h2>
+          <h2 className="fs-4 text-dark fw-bold mb-0">Nodos del Sistema</h2>
           <p className="text-muted small mb-0">Gestiona la topología local o distribuida del cluster</p>
         </div>
         <button 
-          className="btn btn-outline-light btn-sm px-3 rounded-pill"
+          className="btn btn-outline-dark btn-sm px-3 rounded-pill"
           onClick={() => setIsOpen(!isOpen)}
         >
           {isOpen ? 'Ocultar Configuración' : 'Configurar Cluster'}
@@ -64,23 +64,23 @@ export default function ConfiguracionPeers() {
 
       {isOpen && (
         <div className="card glass-card border-none p-4 mb-4 transition-all duration-300">
-          <h5 className="text-light mb-3 fw-bold">Configuración de Procesos</h5>
+          <h5 className="text-dark mb-3 fw-bold">Configuración de Procesos</h5>
           <p className="text-muted small">
             Define la IP y el puerto de cada nodo. Si estás ejecutando todo localmente, usa <code>127.0.0.1</code> y asigna puertos diferentes para cada instancia (por ejemplo, 8081, 8082, 8083).
           </p>
 
           <div className="row g-2 mb-3">
             {peers.map((peer, idx) => (
-              <div key={idx} className="col-12 p-3 bg-dark-semi rounded border border-dark-semi mb-2 d-flex flex-wrap align-items-center gap-3 justify-content-between">
+              <div key={idx} className="col-12 p-3 bg-light border rounded mb-2 d-flex flex-wrap align-items-center gap-3 justify-content-between">
                 <div className="d-flex align-items-center gap-2">
                   <span className="badge bg-indigo-semi text-indigo-text font-mono py-2 px-2.5 rounded">
                     Nodo {peer.id}
                   </span>
                   <div className="d-flex align-items-center gap-1.5">
-                    <label className="text-muted small font-mono mb-0">ID:</label>
+                    <label className="text-secondary small font-mono mb-0">ID:</label>
                     <input 
                       type="number" 
-                      className="form-control form-control-sm bg-dark text-light border-dark-semi font-mono" 
+                      className="form-control form-control-sm bg-white text-dark border-secondary-subtle font-mono" 
                       style={{ width: '60px' }}
                       value={peer.id}
                       onChange={(e) => handleFieldChange(idx, 'id', e.target.value)}
@@ -90,19 +90,19 @@ export default function ConfiguracionPeers() {
 
                 <div className="d-flex flex-grow-1 flex-wrap gap-2 max-w-lg align-items-center">
                   <div className="d-flex align-items-center gap-1.5 flex-grow-1">
-                    <label className="text-muted small font-mono mb-0">IP:</label>
+                    <label className="text-secondary small font-mono mb-0">IP:</label>
                     <input 
                       type="text" 
-                      className="form-control form-control-sm bg-dark text-light border-dark-semi font-mono"
+                      className="form-control form-control-sm bg-white text-dark border-secondary-subtle font-mono"
                       value={peer.ip}
                       onChange={(e) => handleFieldChange(idx, 'ip', e.target.value)}
                     />
                   </div>
                   <div className="d-flex align-items-center gap-1.5 flex-grow-1">
-                    <label className="text-muted small font-mono mb-0">Puerto:</label>
+                    <label className="text-secondary small font-mono mb-0">Puerto:</label>
                     <input 
                       type="number" 
-                      className="form-control form-control-sm bg-dark text-light border-dark-semi font-mono"
+                      className="form-control form-control-sm bg-white text-dark border-secondary-subtle font-mono"
                       style={{ width: '90px' }}
                       value={peer.puerto}
                       onChange={(e) => handleFieldChange(idx, 'puerto', e.target.value)}

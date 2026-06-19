@@ -1,97 +1,103 @@
 @import url('https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&family=Fira+Code:wght@400;500;600&display=swap');
 
 :root {
-  --bg-primary: #070913;
-  --bg-gradient: radial-gradient(circle at top, #0f172a 0%, #020617 100%);
-  --glass-bg: rgba(15, 23, 42, 0.45);
-  --glass-border: rgba(255, 255, 255, 0.08);
-  --glass-border-heavy: rgba(255, 255, 255, 0.15);
-  --color-indigo: #6366f1;
-  --color-indigo-hover: #4f46e5;
-  --color-indigo-semi: rgba(99, 102, 241, 0.15);
-  --color-indigo-edge: rgba(99, 102, 241, 0.3);
-  --color-indigo-text: #818cf8;
+  --bg-primary: #f8fafc;
+  --bg-gradient: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 50%, #e2e8f0 100%);
+  --glass-bg: rgba(255, 255, 255, 0.7);
+  --glass-border: rgba(15, 23, 42, 0.08);
+  --glass-border-heavy: rgba(15, 23, 42, 0.15);
+  --color-indigo: #4f46e5;
+  --color-indigo-hover: #4338ca;
+  --color-indigo-semi: rgba(79, 70, 229, 0.08);
+  --color-indigo-edge: rgba(79, 70, 229, 0.2);
+  --color-indigo-text: #4f46e5;
   
-  /* Glowing badges */
-  --glow-info-bg: rgba(0, 210, 255, 0.08);
-  --glow-info-border: rgba(0, 210, 255, 0.3);
-  --glow-info-text: #00d2ff;
+  /* Glowing badges (light mode) */
+  --glow-info-bg: rgba(14, 165, 233, 0.06);
+  --glow-info-border: rgba(14, 165, 233, 0.25);
+  --glow-info-text: #0284c7;
   
-  --glow-success-bg: rgba(0, 255, 135, 0.08);
-  --glow-success-border: rgba(0, 255, 135, 0.3);
-  --glow-success-text: #00ff87;
+  --glow-success-bg: rgba(22, 163, 74, 0.06);
+  --glow-success-border: rgba(22, 163, 74, 0.25);
+  --glow-success-text: #16a34a;
   
-  --glow-warning-bg: rgba(255, 193, 7, 0.08);
-  --glow-warning-border: rgba(255, 193, 7, 0.3);
-  --glow-warning-text: #ffd23f;
+  --glow-warning-bg: rgba(217, 119, 6, 0.06);
+  --glow-warning-border: rgba(217, 119, 6, 0.25);
+  --glow-warning-text: #b45309;
   
-  --glow-danger-bg: rgba(230, 57, 70, 0.08);
-  --glow-danger-border: rgba(230, 57, 70, 0.3);
-  --glow-danger-text: #ff4d6d;
+  --glow-danger-bg: rgba(220, 38, 38, 0.06);
+  --glow-danger-border: rgba(220, 38, 38, 0.25);
+  --glow-danger-text: #dc2626;
 
-  --glow-purple-bg: rgba(168, 85, 247, 0.08);
-  --glow-purple-border: rgba(168, 85, 247, 0.3);
-  --glow-purple-text: #c084fc;
+  --glow-purple-bg: rgba(147, 51, 234, 0.06);
+  --glow-purple-border: rgba(147, 51, 234, 0.25);
+  --glow-purple-text: #9333ea;
 }
 
 body {
   background: var(--bg-primary);
   background-image: var(--bg-gradient);
   background-attachment: fixed;
-  color: #f8fafc;
+  color: #0f172a;
   font-family: 'Outfit', sans-serif;
   min-height: 100vh;
 }
 
-/* Glassmorphism Cards */
+/* Glassmorphism Cards (Light Mode) */
 .glass-card {
   background: var(--glass-bg);
   backdrop-filter: blur(16px);
   -webkit-backdrop-filter: blur(16px);
   border: 1px solid var(--glass-border) !important;
   border-radius: 16px !important;
-  box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.37);
+  box-shadow: 0 8px 30px rgba(15, 23, 42, 0.05);
   transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
 .glass-card:hover {
-  border-color: rgba(255, 255, 255, 0.12) !important;
+  border-color: rgba(15, 23, 42, 0.15) !important;
 }
 
 /* Elevating hover effect */
 .hover-elevate:hover {
   transform: translateY(-4px);
-  box-shadow: 0 12px 40px 0 rgba(0, 0, 0, 0.5);
+  box-shadow: 0 12px 30px rgba(15, 23, 42, 0.1);
 }
 
-/* Border highlighting for coordinator/leader */
+/* Border highlighting for coordinator/leader (Light Mode) */
 .border-leader {
-  border: 1.5px solid rgba(255, 193, 7, 0.4) !important;
+  border: 1.5px solid rgba(217, 119, 6, 0.4) !important;
 }
 
 .shadow-leader {
-  box-shadow: 0 0 25px rgba(255, 193, 7, 0.15), 0 8px 32px 0 rgba(0, 0, 0, 0.37) !important;
+  box-shadow: 0 0 20px rgba(217, 119, 6, 0.1), 0 8px 30px rgba(15, 23, 42, 0.05) !important;
 }
 
-/* Form controls inside config */
+/* Semi-transparent panel styles (Light Mode) */
 .bg-dark-semi {
-  background: rgba(15, 23, 42, 0.6) !important;
+  background: rgba(241, 245, 249, 0.8) !important;
+}
+
+.bg-light-semi {
+  background: rgba(248, 250, 252, 0.9) !important;
 }
 
 .border-dark-semi {
-  border-color: rgba(255, 255, 255, 0.06) !important;
+  border-color: rgba(15, 23, 42, 0.08) !important;
 }
 
+/* Form controls inside config (Light Mode) */
 .bg-dark-semi input,
 .bg-dark-semi select {
-  background-color: #030712 !important;
-  border: 1px solid rgba(255, 255, 255, 0.1) !important;
+  background-color: #ffffff !important;
+  border: 1px solid rgba(15, 23, 42, 0.12) !important;
+  color: #0f172a !important;
 }
 
 .bg-dark-semi input:focus {
   border-color: var(--color-indigo) !important;
-  box-shadow: 0 0 0 0.25rem rgba(99, 102, 241, 0.25) !important;
-  color: #fff !important;
+  box-shadow: 0 0 0 0.25rem rgba(79, 70, 229, 0.15) !important;
+  color: #0f172a !important;
 }
 
 /* Badges and Buttons */
@@ -126,12 +132,12 @@ body {
 
 /* Glowing text and gradient text */
 .text-gradient {
-  background: linear-gradient(135deg, #818cf8 0%, #c084fc 100%);
+  background: linear-gradient(135deg, #4f46e5 0%, #9333ea 100%);
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
 }
 
-/* Log badging system */
+/* Log badging system (Light Mode) */
 .bg-info-glow {
   background-color: var(--glow-info-bg) !important;
   border-color: var(--glow-info-border) !important;
@@ -186,17 +192,17 @@ body {
 }
 
 .dot-active {
-  background-color: #00ff87;
-  box-shadow: 0 0 10px #00ff87;
+  background-color: #22c55e;
+  box-shadow: 0 0 8px #22c55e;
 }
 
 .dot-fail {
-  background-color: #e63946;
-  box-shadow: 0 0 10px #e63946;
+  background-color: #ef4444;
+  box-shadow: 0 0 8px #ef4444;
 }
 
 .dot-offline {
-  background-color: #6c757d;
+  background-color: #94a3b8;
 }
 
 /* Monospace font utility */
@@ -241,9 +247,9 @@ body {
 .w-20 { width: 20%; }
 .w-30 { width: 30%; }
 
-/* Log Console Custom Table Styling */
+/* Log Console Custom Table Styling (Light Mode) */
 .table-dark-header {
-  background-color: rgba(15, 23, 42, 0.8) !important;
+  background-color: rgba(241, 245, 249, 0.9) !important;
 }
 
 .log-table tbody tr {
@@ -251,12 +257,21 @@ body {
 }
 
 .log-table tbody tr:hover {
-  background-color: rgba(99, 102, 241, 0.06) !important;
+  background-color: rgba(79, 70, 229, 0.04) !important;
 }
 
 .table {
   --bs-table-bg: transparent !important;
   --bs-table-hover-bg: transparent !important;
+  --bs-table-striped-bg: rgba(15, 23, 42, 0.015) !important;
+}
+
+.text-light-semi {
+  color: #1e293b !important;
+}
+
+.text-muted-light {
+  color: #475569 !important;
 }
 
 /* Custom Scrollbars */
@@ -266,17 +281,17 @@ body {
 }
 
 ::-webkit-scrollbar-track {
-  background: rgba(15, 23, 42, 0.2);
+  background: rgba(15, 23, 42, 0.05);
   border-radius: 4px;
 }
 
 ::-webkit-scrollbar-thumb {
-  background: rgba(255, 255, 255, 0.12);
+  background: rgba(15, 23, 42, 0.1);
   border-radius: 4px;
 }
 
 ::-webkit-scrollbar-thumb:hover {
-  background: rgba(255, 255, 255, 0.24);
+  background: rgba(15, 23, 42, 0.2);
 }
 
 /* Pulsing and spinning animations */
@@ -286,7 +301,7 @@ body {
     opacity: 0.5;
   }
   50% {
-    opacity: 0.2;
+    opacity: 0.25;
   }
   100% {
     transform: scale(1.15);
@@ -312,8 +327,8 @@ body {
   display: inline-block;
   width: 8px;
   height: 8px;
-  background-color: #818cf8;
+  background-color: #4f46e5;
   border-radius: 50%;
-  box-shadow: 0 0 8px #818cf8;
+  box-shadow: 0 0 6px #4f46e5;
   animation: text-pulse 1.5s infinite ease-in-out;
 }
