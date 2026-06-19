@@ -51,8 +51,8 @@ export default function ConfiguracionPeers() {
     <div className="mb-4">
       <div className="d-flex justify-content-between align-items-center mb-3">
         <div>
-          <h2 className="fs-4 text-dark fw-bold mb-0">Nodos del Sistema</h2>
-          <p className="text-muted small mb-0">Gestiona la topología local o distribuida del cluster</p>
+          <h3 className="fs-5 text-dark fw-bold mb-0">Nodos del Sistema</h3>
+          <p className="text-muted fs-8 mb-0">Gestiona la topología local o distribuida del cluster</p>
         </div>
         <button 
           className="btn btn-outline-dark btn-sm px-3 rounded-pill"

@@ -71,17 +71,17 @@ export default function App() {
       <ConfiguracionPeers />
 
       {/* Cluster Quick Statistics */}
-      <div className="row mb-4 g-3">
+      <div className="row mb-3 g-2">
         <div className="col-md-4">
           <div className="card glass-card h-100 border-none">
-            <div className="card-body py-3 d-flex justify-content-between align-items-center">
+            <div className="card-body py-2 px-3 d-flex justify-content-between align-items-center">
               <div>
                 <small className="text-muted d-block uppercase tracking-wider fs-9">Líder Electo</small>
-                <h3 className="mb-0 text-dark fw-bold font-mono">
+                <h5 className="mb-0 text-dark fw-bold font-mono fs-6">
                   {coordinador ? `Proceso ${coordinador.id}` : 'Buscando...'}
-                </h3>
+                </h5>
               </div>
-              <div className="icon-badge bg-warning-glow text-warning-glow-text rounded p-2">
+              <div className="icon-badge bg-warning-glow text-warning-glow-text rounded p-1.5 fs-7">
                 👑
               </div>
             </div>
@@ -89,14 +89,14 @@ export default function App() {
         </div>
         <div className="col-md-4">
           <div className="card glass-card h-100 border-none">
-            <div className="card-body py-3 d-flex justify-content-between align-items-center">
+            <div className="card-body py-2 px-3 d-flex justify-content-between align-items-center">
               <div>
                 <small className="text-muted d-block uppercase tracking-wider fs-9">Procesos en Línea</small>
-                <h3 className="mb-0 text-dark fw-bold font-mono">
+                <h5 className="mb-0 text-dark fw-bold font-mono fs-6">
                   {conectadosCount} / {totalPeers}
-                </h3>
+                </h5>
               </div>
-              <div className="icon-badge bg-success-glow text-success-glow-text rounded p-2">
+              <div className="icon-badge bg-success-glow text-success-glow-text rounded p-1.5 fs-7">
                 🔌
               </div>
             </div>
@@ -104,14 +104,14 @@ export default function App() {
         </div>
         <div className="col-md-4">
           <div className="card glass-card h-100 border-none">
-            <div className="card-body py-3 d-flex justify-content-between align-items-center">
+            <div className="card-body py-2 px-3 d-flex justify-content-between align-items-center">
               <div>
                 <small className="text-muted d-block uppercase tracking-wider fs-9">Mensajes Intercambiados</small>
-                <h3 className="mb-0 text-dark fw-bold font-mono">
+                <h5 className="mb-0 text-dark fw-bold font-mono fs-6">
                   {mensajes.length}
-                </h3>
+                </h5>
               </div>
-              <div className="icon-badge bg-info-glow text-info-glow-text rounded p-2">
+              <div className="icon-badge bg-info-glow text-info-glow-text rounded p-1.5 fs-7">
                 💬
               </div>
             </div>
