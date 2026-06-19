@@ -31,15 +31,18 @@ function peerUrl(peer) {
 }
 
 async function fetchJson(url, options = {}) {
-  // Use AbortController with a 1000ms timeout to prevent requests to down/unreachable nodes from freezing frontend polling
+  const timeout = options.timeout || 1000
+  const fetchOptions = { ...options }
+  delete fetchOptions.timeout
+
   const controller = new AbortController()
-  const timeoutId = setTimeout(() => controller.abort(), 1000)
+  const timeoutId = setTimeout(() => controller.abort(), timeout)
 
   try {
     const res = await fetch(url, {
       headers: { 'Content-Type': 'application/json' },
       signal: controller.signal,
-      ...options
+      ...fetchOptions
     })
     clearTimeout(timeoutId)
     if (!res.ok) return null
@@ -119,3 +122,37 @@ export async function fetchLogsFromAll() {
   uniqueLogs.sort((a, b) => a.timestamp - b.timestamp)
   return uniqueLogs
 }
+
+function bftPeerUrl(peer) {
+  return `http://${peer.ip}:${peer.puerto}/api/bft`
+}
+
+export async function getBftConfig(peer) {
+  return fetchJson(`${bftPeerUrl(peer)}/config`)
+}
+
+export async function configureBftNode(peer, config) {
+  return fetchJson(`${bftPeerUrl(peer)}/configure`, {
+    method: 'POST',
+    body: JSON.stringify(config),
+    timeout: 3000
+  })
+}
+
+export async function startBftConsensus(peer) {
+  return fetchJson(`${bftPeerUrl(peer)}/start`, { 
+    method: 'POST',
+    timeout: 15000 
+  })
+}
+
+export async function configureBftNodeOnAll(activePeers, config) {
+  const promises = activePeers.map(peer => {
+    if (peer.conectado) {
+      return configureBftNode(peer, config)
+    }
+    return Promise.resolve(null)
+  })
+  return Promise.all(promises)
+}
+

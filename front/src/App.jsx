@@ -2,6 +2,7 @@ import React, { useState, useEffect, useCallback, useRef } from 'react'
 import ProcesoCard from './components/ProcesoCard'
 import LogMensajes from './components/LogMensajes'
 import ConfiguracionPeers from './components/ConfiguracionPeers'
+import ConsensoBft from './components/ConsensoBft'
 import {
   fetchAllPeersStatus,
   fetchLogsFromAll
@@ -147,6 +148,9 @@ export default function App() {
           </div>
         </div>
       </div>
+
+      {/* Consenso BFT Component */}
+      <ConsensoBft procesos={procesos} coordinador={coordinador} />
 
       {/* Log Messages System Console */}
       <div className="mb-5">

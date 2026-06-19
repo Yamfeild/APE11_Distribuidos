@@ -3,4 +3,7 @@
 /home/deivy/Documentos/6toCiclo/Distribuidos/U2/APE10_Distribuidos/backend/src/main/java/com/practica/bully/controller/BullyController.java
 /home/deivy/Documentos/6toCiclo/Distribuidos/U2/APE10_Distribuidos/backend/src/main/java/com/practica/bully/model/MensajeBully.java
 /home/deivy/Documentos/6toCiclo/Distribuidos/U2/APE10_Distribuidos/backend/src/main/java/com/practica/bully/service/BullyService.java
+/home/deivy/Documentos/6toCiclo/Distribuidos/U2/APE10_Distribuidos/backend/src/main/java/com/practica/bully/service/BftService.java
+/home/deivy/Documentos/6toCiclo/Distribuidos/U2/APE10_Distribuidos/backend/src/main/java/com/practica/bully/model/BftNodeConfig.java
 /home/deivy/Documentos/6toCiclo/Distribuidos/U2/APE10_Distribuidos/backend/src/main/java/com/practica/bully/BullyApplication.java
+/home/deivy/Documentos/6toCiclo/Distribuidos/U2/APE10_Distribuidos/backend/src/main/java/com/practica/bully/controller/BftController.java
